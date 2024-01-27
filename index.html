@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autocomple</title>
+    <style>
+        .searchInput{
+            background-color: grey;
+            color:red;
+        }
+        .output{
+            background-color:white;
+        }
+        .container {
+            color: black;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Autocomple</h1>
+
+    <div class="container">
+        <input  type="text" class="searchInput" placeholder="Type your input and press Enter">
+        <div  class="output"></div>
+    </div>
+    <script>
+        const searchInputs = document.querySelectorAll('.searchInput');
+        const outputDivs = document.querySelectorAll('.output');
+
+        searchInputs.forEach((input, index) => {
+            input.addEventListener('keyup', function (event) {
+                if (event.key === 'Enter') {
+                    runCppProgram(input.value, index);
+                }
+            });
+        });
+
+        function runCppProgram(input, index) {
+            const command = `./autocomplete ${input}`;
+
+            fetch(`/run_cpp_program?command=${encodeURIComponent(command)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const output = data.output || 'No output';
+                    outputDivs[index].innerText = `${output}`;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    outputDivs[index].innerText = 'Error running C++ program';
+                });
+        }
+
+        setInterval(() => {
+            outputDivs.forEach((output, index) => {
+                const inputValue = searchInputs[index].value;
+                if (inputValue) {
+                    runCppProgram(inputValue, index);
+                }
+            });
+        }, 200);
+    </script>
+</body>
+</html>  
